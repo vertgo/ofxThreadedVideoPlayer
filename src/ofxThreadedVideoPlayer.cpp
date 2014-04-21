@@ -16,6 +16,8 @@ ofxThreadedVideoPlayer::ofxThreadedVideoPlayer(){
 	needToNotifyDelegate = false;
 	destroying = false;
 	readyForPlayback = false;
+    //debug only
+    totalOffset = 0.f;
 }
 
 ofxThreadedVideoPlayer::~ofxThreadedVideoPlayer(){
@@ -30,11 +32,18 @@ void ofxThreadedVideoPlayer::loadVideo(string path){
 	videopPath = path;
 	loadNow = true;
 	if(!isThreadRunning()) startThread();
+        totalOffset = 0.f;
 }
 
 void ofxThreadedVideoPlayer::play(){
 	playNow = true;
 	if(!isThreadRunning()) startThread();
+}
+
+//added by Mike
+void ofxThreadedVideoPlayer::play( float curTime){
+    player->setPositionInSeconds(curTime);
+	play();
 }
 
 void ofxThreadedVideoPlayer::stop(){
@@ -214,6 +223,51 @@ void ofxThreadedVideoPlayer::setPosition(float percent){
 		unlock();
 		if(!isThreadRunning()) startThread();
 	}
+}
+
+//added by mike
+void ofxThreadedVideoPlayer::setSpeed(float speed){
+	if(player){
+		lock();
+		player->setSpeed( speed );
+		unlock();
+		if(!isThreadRunning()) startThread();
+	}
+}
+
+//added by Mike
+void ofxThreadedVideoPlayer::syncToPlayhead(float playHead){//in in seconds
+    //unsigned long long playHead = ofGetSystemTime() - vidStartTime;
+    if(player){
+        lock();
+        if (!player->isLoaded()){
+            unlock();
+            return;
+        }
+        float curVidTime = (player->getPosition() * player->getDuration() );
+        float curOffset = (playHead -curVidTime);
+        float adjustedSpeed = CLAMP( 1.f + ( curOffset )/1, .1f, 1.9f);
+        //
+        float curSpeed = player->getSpeed();
+        
+        /*if ( abs(curOffset) >1.9f ){
+            cout << "jumping playhead\n";
+            player->setSpeed(1.f);
+            player->setPositionInSeconds(playHead + .5f); //set it to the time at next frame and see what happens then
+        }*/
+        
+        //if they are both the same sign (like readjust when it crosses from having to speed up to slow down)
+        //and the are pretty close, then don't readjust
+        /*else*/ if ( (adjustedSpeed * curSpeed > 0) && abs( adjustedSpeed - curSpeed ) > 0.05f ){
+            cout << "adjusting speed\n";
+            player->setSpeed( adjustedSpeed ); //maybe setting the playspeed too much slows it down
+        }
+        
+        unlock();
+        totalOffset+= abs( curOffset );
+        //cout << "playhead:"<<playHead<< "curVidTime:" << curVidTime << ", curOffset:" << curOffset << ", adjustedSpeed:" << adjustedSpeed << ", getSpeed:"<<player->getSpeed()<<endl;
+    }
+    
 }
 
 float ofxThreadedVideoPlayer::getPosition(){

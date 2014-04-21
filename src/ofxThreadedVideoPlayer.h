@@ -30,12 +30,17 @@ public:
 
 	void loadVideo(string path);
 	void play();
+    //added by mike
+    void play( float curTime );
 	void stop();
 
 	void setLoopMode(ofLoopType loop);
 	bool hasFinished();
 
 	void setPosition(float percent);
+    //added by mike
+    void setSpeed( float speed);
+    
 	float getPosition();
 	float getDuration();
 
@@ -47,10 +52,13 @@ public:
 	void draw(float x, float y, float w, float h);
 	void drawDebug(float x, float y);
 	void update();
+    void syncToPlayhead( float playHead); //in seconds
 
 	float getWidth();
 	float getHeight();
-
+    
+    //debug only
+    float totalOffset;
 	//public ofEvent api
 	//call ofAddListener(v->videoIsReadyEvent, this, &testApp::videoIsReadyCallback);
 	//to get notified when the video is ready for playback
