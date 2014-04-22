@@ -52,6 +52,7 @@ public:
 	void draw(float x, float y, float w, float h);
 	void drawDebug(float x, float y);
 	void update();
+    //added by mike
     void syncToPlayhead( float playHead); //in seconds
 
 	float getWidth();
@@ -63,6 +64,7 @@ public:
 	//call ofAddListener(v->videoIsReadyEvent, this, &testApp::videoIsReadyCallback);
 	//to get notified when the video is ready for playback
 	ofEvent<ofxThreadedVideoPlayerStatus>	videoIsReadyEvent;
+    bool isPlaying();
 
 private:
 

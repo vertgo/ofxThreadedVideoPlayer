@@ -134,6 +134,14 @@ bool ofxThreadedVideoPlayer::hasFinished(){
 	return ret;
 }
 
+bool ofxThreadedVideoPlayer::isPlaying(){
+	bool ret = false;
+	lock();
+	ret = player->isPlaying();
+	unlock();
+	return ret;
+}
+
 void ofxThreadedVideoPlayer::update(){
 
 	lock();
