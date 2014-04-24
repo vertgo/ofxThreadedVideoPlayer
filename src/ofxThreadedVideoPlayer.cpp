@@ -282,7 +282,7 @@ void ofxThreadedVideoPlayer::syncToPlayhead(float playHead){//in in seconds
         
         float curVidTime = (player->getPosition() * player->getDuration() );
         float curOffset = (playHead -curVidTime);
-        float  = CLAMP( 1.f + ( curOffset )/5.f, .9f, 1.2f);
+        float adjustedSpeed = CLAMP( 1.f + ( curOffset )/5.f, .9f, 1.2f);
         //
         float curSpeed = player->getSpeed();
         
