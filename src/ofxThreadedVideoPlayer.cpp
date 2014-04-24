@@ -257,7 +257,19 @@ void ofxThreadedVideoPlayer::setPaused(bool inPaused){
 	}
 }
 
+void ofxThreadedVideoPlayer::setVolume(float inVolume){
+	if(player){
+		lock();
 
+		player->setVolume(inVolume);
+		unlock();
+		if(!isThreadRunning()) startThread();
+	}
+    else{
+        cout <<"WARNING NO PLAYER TO SETVOLUME ON" <<endl;
+        //todo store the volume til the player exists
+    }
+}
 
 //added by mike
 void ofxThreadedVideoPlayer::setSpeed(float speed){

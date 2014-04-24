@@ -40,7 +40,9 @@ public:
 	void setPosition(float percent);
     //added by mike
     void setPaused(bool inPaused);
+    void setVolume( float inVolume);
     void setSpeed( float speed);
+    
     
 	float getPosition();
 	float getDuration();
@@ -55,6 +57,7 @@ public:
 	void update();
     //added by mike
     void syncToPlayhead( float playHead); //in seconds
+
 
 	float getWidth();
 	float getHeight();
