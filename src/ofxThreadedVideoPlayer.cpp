@@ -137,18 +137,18 @@ bool ofxThreadedVideoPlayer::hasFinished(){
 bool ofxThreadedVideoPlayer::isPlaying(){
 	bool ret = false;
 	lock();
-	ret = player->isPlaying();
+	ret = player->getPlaying();
 	unlock();
 	return ret;
 }
 
 void ofxThreadedVideoPlayer::update(){
-
+    //cout << "ofxThreadedVideoPlayer::update::1\n";
 	lock();
 	if(player){
 		bool reallyLoaded = player->isReallyLoaded();
 		ofTexture * tex = player->getTexture();
-
+    //cout << "ofxThreadedVideoPlayer::update::2\n";
 		if( reallyLoaded && tex){
 
 			if(needToNotifyDelegate){ //notify our delegate from the main therad, just in case (draw() always called from main thread)
@@ -158,10 +158,13 @@ void ofxThreadedVideoPlayer::update(){
 				ofNotifyEvent( videoIsReadyEvent, status, this );
 				needToNotifyDelegate = false;
 				readyForPlayback = true;
+                    //cout << "ofxThreadedVideoPlayer::update::3\n";
 			}
 		}
 	}
+        //cout << "ofxThreadedVideoPlayer::update::4\n";
 	unlock();
+        //cout << "ofxThreadedVideoPlayer::update::5\n";
 
 }
 
@@ -234,6 +237,29 @@ void ofxThreadedVideoPlayer::setPosition(float percent){
 }
 
 //added by mike
+void ofxThreadedVideoPlayer::setPaused(bool inPaused){
+	if(player){
+        bool lockInHere = false;
+        if( !blocking ){
+            lock();
+            lockInHere = true;
+        }
+		
+		player->stop();
+		player->setPaused(inPaused);
+        
+        playNow = !inPaused;
+        
+        if ( lockInHere ){
+            unlock();
+        }
+		if(!isThreadRunning()) startThread();
+	}
+}
+
+
+
+//added by mike
 void ofxThreadedVideoPlayer::setSpeed(float speed){
 	if(player){
 		lock();
@@ -252,24 +278,23 @@ void ofxThreadedVideoPlayer::syncToPlayhead(float playHead){//in in seconds
             unlock();
             return;
         }
+        
+        
         float curVidTime = (player->getPosition() * player->getDuration() );
         float curOffset = (playHead -curVidTime);
-        float adjustedSpeed = CLAMP( 1.f + ( curOffset )/1, .1f, 1.9f);
+        float  = CLAMP( 1.f + ( curOffset )/5.f, .9f, 1.2f);
         //
         float curSpeed = player->getSpeed();
         
-        /*if ( abs(curOffset) >1.9f ){
-            cout << "jumping playhead\n";
-            player->setSpeed(1.f);
-            player->setPositionInSeconds(playHead + .5f); //set it to the time at next frame and see what happens then
-        }*/
-        
-        //if they are both the same sign (like readjust when it crosses from having to speed up to slow down)
+
         //and the are pretty close, then don't readjust
-        /*else*/ if ( (adjustedSpeed * curSpeed > 0) && abs( adjustedSpeed - curSpeed ) > 0.05f ){
+        /*else*/ if ( abs( adjustedSpeed - curSpeed ) > 0.03f ){
             cout << "adjusting speed\n";
+            cout << "playHead:"<<playHead<< "curVidTime:" << curVidTime << ", curOffset:" << curOffset << ", adjustedSpeed:" << adjustedSpeed << ", getSpeed:"<<curSpeed<<endl;
             player->setSpeed( adjustedSpeed ); //maybe setting the playspeed too much slows it down
         }
+        //cout << "playHead:"<<playHead<< "curVidTime:" << curVidTime << ", curOffset:" << curOffset << ", adjustedSpeed:" << adjustedSpeed << ", getSpeed:"<<curSpeed<<endl;
+        
         
         unlock();
         totalOffset+= abs( curOffset );

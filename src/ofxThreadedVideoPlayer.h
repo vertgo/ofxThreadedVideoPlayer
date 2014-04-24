@@ -39,6 +39,7 @@ public:
 
 	void setPosition(float percent);
     //added by mike
+    void setPaused(bool inPaused);
     void setSpeed( float speed);
     
 	float getPosition();
