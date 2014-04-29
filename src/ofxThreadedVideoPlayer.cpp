@@ -146,11 +146,11 @@ void ofxThreadedVideoPlayer::update(){
     //cout << "ofxThreadedVideoPlayer::update::1\n";
 	lock();
 	if(player){
+        
 		bool reallyLoaded = player->isReallyLoaded();
 		ofTexture * tex = player->getTexture();
     //cout << "ofxThreadedVideoPlayer::update::2\n";
 		if( reallyLoaded && tex){
-
 			if(needToNotifyDelegate){ //notify our delegate from the main therad, just in case (draw() always called from main thread)
 				ofxThreadedVideoPlayerStatus status;
 				status.path = videopPath;
@@ -255,6 +255,9 @@ void ofxThreadedVideoPlayer::setPaused(bool inPaused){
         }
 		if(!isThreadRunning()) startThread();
 	}
+    else{
+         playNow = !inPaused;
+    }
 }
 
 void ofxThreadedVideoPlayer::setVolume(float inVolume){
